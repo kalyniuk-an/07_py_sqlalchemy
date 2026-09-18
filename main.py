@@ -370,6 +370,150 @@ def update_grade(grade_id, grade_value, grade_date, student_id, subject_id):
     finally:
         session.close()
 
+def remove_group(group_id):
+    session = SessionLocal()
+
+    try:
+        group = session.query(Group).filter(
+            Group.id == group_id
+        ).first()
+
+        if not group:
+            print("Group not found.")
+            return
+
+        session.delete(group)
+        session.commit()
+
+        print(f"Group removed: {group_id}")
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
+def remove_teacher(teacher_id):
+    session = SessionLocal()
+
+    try:
+        teacher = session.query(Teacher).filter(
+            Teacher.id == teacher_id
+        ).first()
+
+        if not teacher:
+            print("Teacher not found.")
+            return
+
+        session.delete(teacher)
+        session.commit
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
+
+def remove_student(student_id):
+    session = SessionLocal()
+
+    try:
+        student = session.query(Student).filter(
+            Student.id == student_id
+        ).first()
+
+        if not student:
+            print("Student not found.")
+            return
+
+        session.query(Grade).filter(
+            Grade.student_id == student_id
+        ).delete(
+            synchronize_session=False
+        )
+
+        session.delete(student)
+        session.commit()
+
+        print(f"Student removed: {student_id}")
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
+
+def remove_subject(subject_id):
+    session = SessionLocal()
+
+    try:
+        subject = session.query(Subject).filter(
+            Subject.id == subject_id
+        ).first()
+
+        if not subject:
+            print("Subject not found.")
+            return
+
+        session.query(Grade).filter(
+            Grade.subject_id == subject_id
+        ).delete(
+            synchronize_session=False
+        )
+
+        session.delete(subject)
+        session.commit()
+
+        print(f"Subject removed: {subject_id}")
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
+
+def remove_grade(student_id, subject_id, grade_date):
+    session = SessionLocal()
+
+    try:
+        grade = session.query(Grade).filter(
+            Grade.student_id == student_id,
+            Grade.subject_id == subject_id,
+            Grade.grade_date == date.fromisoformat(grade_date)
+        ).first()
+
+        if not grade:
+            print("Grade not found.")
+            return
+
+        session.delete(grade)
+        session.commit()
+
+        print(
+            f"Grade removed: "
+            f"Student: {student_id}, "
+            f"Subject: {subject_id}, "
+            f"Date: {grade_date}"
+        )
+
+    except ValueError:
+        session.rollback()
+        print("Date must be in YYYY-MM-DD format.")
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
 def main():
     parser = argparse.ArgumentParser(
         description="Student database CLI"
@@ -470,12 +614,7 @@ def main():
       create_subject(args.name, args.teacher_id)
 
     if args.action == "create" and args.model == "Grade":
-      create_grade(
-          args.student_id,
-          args.subject_id,
-          args.grade,
-          args.grade_date
-      )
+      create_grade(args.student_id, args.subject_id, args.grade, args.grade_date)
 
     if args.action == "update" and args.model == "Group":
        update_group(args.id, args.name)
@@ -492,6 +631,20 @@ def main():
     if args.action == "update" and args.model == "Grade":
         update_grade(args.id, args.grade, args.grade_date, args.student_id, args.subject_id)
 
+    if args.action == "remove" and args.model == "Group":
+        remove_group(args.id)
+
+    if args.action == "remove" and args.model == "Teacher":
+        remove_teacher(args.id)
+
+    if args.action == "remove" and args.model == "Student":
+        remove_student(args.id)
+
+    if args.action == "remove" and args.model == "Subject":
+        remove_subject(args.id)
+
+    if args.action == "remove" and args.model == "Grade":
+        remove_grade(args.student_id, args.subject_id, args.grade_date)
 
 if __name__ == "__main__":
     main()
