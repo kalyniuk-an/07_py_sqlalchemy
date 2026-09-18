@@ -198,6 +198,178 @@ def create_grade(student_id, subject_id, grade_value, grade_date):
     finally:
         session.close()
 
+def update_group(group_id, name):
+    session = SessionLocal()
+
+    try:
+        group = session.query(Group).filter(Group.id == group_id).first()
+
+        if not group:
+            print("Group not found.")
+            return
+
+        group.name = name
+
+        session.commit()
+
+        print(f"Group updated: {group.id} - {group.name}")
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
+
+def update_teacher(teacher_id, name):
+    session = SessionLocal()
+
+    try:
+        teacher = session.query(Teacher).filter(
+            Teacher.id == teacher_id
+        ).first()
+
+        if not teacher:
+            print("Teacher not found.")
+            return
+
+        parts = name.split()
+
+        if len(parts) < 2:
+            print("Please provide first name and last name.")
+            return
+
+        teacher.first_name = parts[0]
+        teacher.last_name = parts[1]
+
+        session.commit()
+
+        print(
+            f"Teacher updated: "
+            f"{teacher.id} - "
+            f"{teacher.first_name} "
+            f"{teacher.last_name}"
+        )
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
+
+def update_student(student_id, name, group_id):
+    session = SessionLocal()
+
+    try:
+        student = session.query(Student).filter(
+            Student.id == student_id
+        ).first()
+
+        if not student:
+            print("Student not found.")
+            return
+
+        parts = name.split()
+
+        if len(parts) < 2:
+            print("Please provide first name and last name.")
+            return
+
+        student.first_name = parts[0]
+        student.last_name = parts[1]
+        student.group_id = group_id
+
+        session.commit()
+
+        print(
+            f"Student updated: "
+            f"{student.id} - "
+            f"{student.first_name} "
+            f"{student.last_name}, "
+            f"Group: {student.group_id}"
+        )
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
+def update_subject(subject_id, name, teacher_id):
+    session = SessionLocal()
+
+    try:
+        subject = session.query(Subject).filter(
+            Subject.id == subject_id
+        ).first()
+
+        if not subject:
+            print("Subject not found.")
+            return
+
+        subject.name = name
+        subject.teacher_id = teacher_id
+
+        session.commit()
+
+        print(
+            f"Subject updated: "
+            f"{subject.id} - "
+            f"{subject.name}, "
+            f"Teacher: {subject.teacher_id}"
+        )
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
+
+def update_grade(grade_id, grade_value, grade_date, student_id, subject_id):
+    session = SessionLocal()
+
+    try:
+        grade = session.query(Grade).filter(
+            Grade.id == grade_id
+        ).first()
+
+        if not grade:
+            print("Grade not found.")
+            return
+
+        grade.grade = grade_value
+        grade.grade_date = date.fromisoformat(grade_date)
+        grade.student_id = student_id
+        grade.subject_id = subject_id
+
+        session.commit()
+
+        print(
+            f"Grade updated: "
+            f"{grade.id} - "
+            f"Grade: {grade.grade}, "
+            f"Student: {grade.student_id}, "
+            f"Subject: {grade.subject_id}, "
+            f"Date: {grade.grade_date}"
+        )
+
+    except ValueError:
+        session.rollback()
+        print("Date must be in YYYY-MM-DD format.")
+
+    except Exception as error:
+        session.rollback()
+        print(f"Error: {error}")
+
+    finally:
+        session.close()
+
 def main():
     parser = argparse.ArgumentParser(
         description="Student database CLI"
@@ -305,10 +477,20 @@ def main():
           args.grade_date
       )
 
-    # print(f"Action: {args.action}")
-    # print(f"Model: {args.model}")
-    # print(f"ID: {args.id}")
-    # print(f"Name: {args.name}")
+    if args.action == "update" and args.model == "Group":
+       update_group(args.id, args.name)
+
+    if args.action == "update" and args.model == "Teacher":
+        update_teacher(args.id, args.name)
+
+    if args.action == "update" and args.model == "Student":
+        update_student(args.id, args.name, args.group_id)
+
+    if args.action == "update" and args.model == "Subject":
+        update_subject(args.id, args.name, args.teacher_id)
+
+    if args.action == "update" and args.model == "Grade":
+        update_grade(args.id, args.grade, args.grade_date, args.student_id, args.subject_id)
 
 
 if __name__ == "__main__":
