@@ -407,7 +407,7 @@ def remove_teacher(teacher_id):
             return
 
         session.delete(teacher)
-        session.commit
+        session.commit()
 
     except Exception as error:
         session.rollback()
